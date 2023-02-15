@@ -16,17 +16,32 @@ exports.registerUser = async (req, res) => {
         message: "please enter all the fields",
       });
     } else {
-      const user = await User.create(userData);
-      if (user) {
-        res.status(200).json({
-          success: true,
-          message: "user created successfully",
-        });
-      } else {
+      const userExistsEmail = await User.findOne({ email: userData.email });
+      const userExistsPhone = await User.findOne({ phone: userData.phone });
+
+      if (userExistsEmail) {
         res.status(400).json({
           success: false,
-          message: "error registering the user",
+          message: "email already exists",
         });
+      } else if (userExistsPhone) {
+        res.status(400).json({
+          success: false,
+          message: "phone number already exists",
+        });
+      } else {
+        const user = await User.create(userData);
+        if (user) {
+          res.status(200).json({
+            success: true,
+            message: "user created successfully",
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            message: "error registering the user",
+          });
+        }
       }
     }
   } catch (error) {
